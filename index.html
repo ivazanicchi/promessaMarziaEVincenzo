@@ -63,19 +63,21 @@
     }
 
     .avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 3px solid #fff;
-        margin-top: 10px;
-    }
+       width: 100px;
+       height: 100px;
+       border-radius: 50%;
+       overflow: hidden;
+       border: 3px solid #fff;
+       margin-top: 10px;
+   }
+   
+   .avatar img {
+       width: 120%;
+       height: 120%;
+       object-fit: cover;
+       object-position: center top; /* sposta verso il volto */
+   }
 
-    .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
 
     .question-box {
         margin-top: 15px;
@@ -198,14 +200,15 @@
     }
 
     .heart {
-        position: fixed;
-        bottom: -20px;
-        font-size: 24px;
-        color: #ff4d6d;
-        animation: rise 4s linear forwards;
-        opacity: 0.9;
-        z-index: 25;
-    }
+       position: fixed;
+       bottom: -20px;
+       font-size: 24px;
+       color: #ff4d6d;
+       animation: rise 4s linear forwards;
+       opacity: 0.9;
+       z-index: 60; /* prima era 25 */
+   }
+
 
     @keyframes rise {
         0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -349,7 +352,7 @@
 <!-- Domanda di coppia -->
 <div class="center-section" id="coupleSection">
     <div class="center-title">Domanda di coppia 💍</div>
-    <img src="IMMAGINE_BUFFA.jpg" class="center-img">
+    <img src="https://imgur.com/yafYoMR.jpg" class="center-img">
     <div class="timer" id="timerDisplay">Tempo: 15s</div>
     <div class="question-text">
         Qual è la qualità che più vi unisce come coppia?
@@ -364,7 +367,7 @@
 
 <!-- Finale -->
 <div class="final-message" id="finalMessage">
-    <img src="IMMAGINE_BUFFA.jpg">
+    <img src="https://imgur.com/yafYoMR.jpg">
     <h2>Promessa superata! 🎉</h2>
     <p>Che l’amore, tra Cina e padel, vi accompagni per tutta la vita.</p>
 </div>
@@ -372,20 +375,23 @@
 <!-- Easter egg Padel -->
 <div class="easter-egg" id="padelEgg">🎾</div>
 <div class="easter-popup" id="padelPopup">
-    <img src="https://tenor.com/odQPdsR9LSt.gif">
+    <img src="https://tenor.com/it/view/tennis-dance-preparation-dancing-motivation-gif-11800117239970137111">
     <button class="close-easter" id="closePadel">Chiudi</button>
 </div>
 
 <!-- Easter egg Panda -->
 <div class="easter-egg" id="pandaEgg">🐼</div>
 <div class="easter-popup" id="pandaPopup">
-    <img src="https://tenor.com/BqNgE7JlCb.gif">
+    <img src="https://tenor.com/it/view/china-chn-chinese-beijing-shanghai-gif-369132490573704141">
     <button class="close-easter" id="closePanda">Chiudi</button>
 </div>
 
 <script>
 let marziaDone = false;
 let vincenzoDone = false;
+let marziaQ1Done = false;
+let vincenzoQ1Done = false;
+
 
 const marziaQ1 = document.getElementById('marziaQ1');
 const marziaQ2 = document.getElementById('marziaQ2');
@@ -403,8 +409,9 @@ let timer = null;
 let timeLeft = 15;
 let coupleAnsweredCorrectly = false;
 
-function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia) {
+function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia, isFirstQuestion) {
     const buttons = boxElement.querySelectorAll('.answer-btn');
+
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
             const correct = btn.getAttribute('data-correct') === 'true';
@@ -413,36 +420,59 @@ function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia) {
 
             if (correct) {
                 btn.classList.add('correct');
+
                 setTimeout(() => {
                     boxElement.classList.remove('active');
-                    if (nextBoxElement) {
-                        nextBoxElement.classList.add('active');
+
+                    if (isFirstQuestion) {
+                        // Segna che la Q1 è stata completata
+                        if (isMarzia) {
+                            marziaQ1Done = true;
+                        } else {
+                            vincenzoQ1Done = true;
+                        }
+
+                        // Se entrambi hanno finito la Q1 → mostra Q2
+                        if (marziaQ1Done && vincenzoQ1Done) {
+                            marziaQ2.classList.add('active');
+                            vincenzoQ2.classList.add('active');
+                        }
+
                     } else {
+                        // Q2 completata → lato completato
                         if (isMarzia) marziaDone = true;
                         else vincenzoDone = true;
+
                         checkBothDone();
                     }
+
                 }, 500);
+
             } else {
                 btn.classList.add('wrong', 'shake');
                 avatarElement.classList.add('shake');
+
                 setTimeout(() => {
                     btn.classList.remove('shake');
                     avatarElement.classList.remove('shake');
+
                     buttons.forEach(b => {
                         b.disabled = false;
                         if (!b.classList.contains('correct')) b.classList.remove('wrong');
                     });
+
                 }, 500);
             }
         });
     });
 }
 
-setupQuestionBox(marziaQ1, marziaQ2, avatarMarzia, true);
-setupQuestionBox(marziaQ2, null, avatarMarzia, true);
-setupQuestionBox(vincenzoQ1, vincenzoQ2, avatarVincenzo, false);
-setupQuestionBox(vincenzoQ2, null, avatarVincenzo, false);
+
+setupQuestionBox(marziaQ1, null, avatarMarzia, true, true);
+setupQuestionBox(marziaQ2, null, avatarMarzia, true, false);
+setupQuestionBox(vincenzoQ1, null, avatarVincenzo, false, true);
+setupQuestionBox(vincenzoQ2, null, avatarVincenzo, false, false);
+
 
 function checkBothDone() {
     if (marziaDone && vincenzoDone && !coupleAnsweredCorrectly) {
