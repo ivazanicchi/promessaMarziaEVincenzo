@@ -463,49 +463,57 @@ function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia, i
                 setTimeout(() => {
                     boxElement.classList.remove('active');
 
+                    // -------------------------
+                    //   DOMANDA 1
+                    // -------------------------
                     if (isFirstQuestion) {
 
-                      if (isMarzia) {
-                          marziaQ1Done = true;
-                          marziaWait.style.display = "block";   // mostra attesa Marzia
-                      } else {
-                          vincenzoQ1Done = true;
-                          vincenzoWait.style.display = "block"; // mostra attesa Vincenzo
-                      }
-                  
-                      // Se entrambi hanno risposto → mostra Q2 e nascondi attese
-                      if (marziaQ1Done && vincenzoQ1Done) {
-                          marziaWait.style.display = "none";
-                          vincenzoWait.style.display = "none";
-                  
-                          marziaQ2.classList.add('active');
-                          vincenzoQ2.classList.add('active');
-                      }
-                  }
-                   } else {
-                      // DOMANDA 2
-                      if (isMarzia) {
-                          marziaQ2Done = true;
-                          marziaWait2.style.display = "block";   // mostra attesa Marzia
-                      } else {
-                          vincenzoQ2Done = true;
-                          vincenzoWait2.style.display = "block"; // mostra attesa Vincenzo
-                      }
-                  
-                      // Se entrambi hanno risposto → vai alla domanda di coppia
-                      if (marziaQ2Done && vincenzoQ2Done) {
-                          marziaWait2.style.display = "none";
-                          vincenzoWait2.style.display = "none";
-                  
-                          marziaDone = true;
-                          vincenzoDone = true;
-                  
-                          checkBothDone();
-                      }
-                  }
+                        if (isMarzia) {
+                            marziaQ1Done = true;
+                            marziaWait.style.display = "block";
+                        } else {
+                            vincenzoQ1Done = true;
+                            vincenzoWait.style.display = "block";
+                        }
+
+                        // Se entrambi hanno risposto → mostra Q2
+                        if (marziaQ1Done && vincenzoQ1Done) {
+                            marziaWait.style.display = "none";
+                            vincenzoWait.style.display = "none";
+
+                            marziaQ2.classList.add('active');
+                            vincenzoQ2.classList.add('active');
+                        }
+
+                    // -------------------------
+                    //   DOMANDA 2
+                    // -------------------------
+                    } else {
+
+                        if (isMarzia) {
+                            marziaQ2Done = true;
+                            marziaWait2.style.display = "block";
+                        } else {
+                            vincenzoQ2Done = true;
+                            vincenzoWait2.style.display = "block";
+                        }
+
+                        // Se entrambi hanno risposto → domanda di coppia
+                        if (marziaQ2Done && vincenzoQ2Done) {
+                            marziaWait2.style.display = "none";
+                            vincenzoWait2.style.display = "none";
+
+                            marziaDone = true;
+                            vincenzoDone = true;
+
+                            checkBothDone();
+                        }
+                    }
+
                 }, 500);
 
             } else {
+                // Risposta sbagliata
                 btn.classList.add('wrong', 'shake');
                 avatarElement.classList.add('shake');
 
@@ -523,6 +531,7 @@ function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia, i
         });
     });
 }
+
 
 
 setupQuestionBox(marziaQ1, null, avatarMarzia, true, true);
