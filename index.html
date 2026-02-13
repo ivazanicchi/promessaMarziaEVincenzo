@@ -75,8 +75,9 @@
        width: 120%;
        height: 120%;
        object-fit: cover;
-       object-position: center;
+       object-position: center top; /* sposta verso il volto */
    }
+
 
     .question-box {
         margin-top: 15px;
@@ -94,6 +95,18 @@
         font-size: 0.95rem;
         margin-bottom: 10px;
     }
+
+   .waiting-box {
+       margin-top: 20px;
+       background: rgba(255,255,255,0.1);
+       padding: 12px;
+       border-radius: 10px;
+       text-align: center;
+       font-size: 0.9rem;
+       color: #ffb347;
+       border: 1px solid rgba(255,255,255,0.2);
+   }
+
 
     .answers {
         display: flex;
@@ -302,6 +315,11 @@
             </div>
         </div>
 
+       <div class="waiting-box" id="marziaWait" style="display:none;">
+          <p>In attesa che il tuo sposo risponda…</p>
+      </div>
+
+
         <div class="question-box" id="marziaQ2">
             <div class="question-text">
                 Quale delle seguenti province cinesi è la più estesa per superficie?
@@ -314,6 +332,11 @@
             </div>
         </div>
     </div>
+
+   <div class="waiting-box" id="marziaWait2" style="display:none;">
+       <p>In attesa che il tuo sposo risponda…</p>
+   </div>
+
 
     <!-- Lato Vincenzo -->
     <div class="side right-side">
@@ -334,6 +357,11 @@
             </div>
         </div>
 
+       <div class="waiting-box" id="vincenzoWait" style="display:none;">
+          <p>In attesa che la tua sposa risponda…</p>
+      </div>
+
+
         <div class="question-box" id="vincenzoQ2">
             <div class="question-text">
                 Quale colpo è considerato il più difficile da eseguire correttamente a livello avanzato?
@@ -345,6 +373,11 @@
                 <button class="answer-btn" data-correct="true">D) Remate x3</button>
             </div>
         </div>
+
+       <div class="waiting-box" id="vincenzoWait2" style="display:none;">
+          <p>In attesa che la tua sposa risponda…</p>
+      </div>
+
     </div>
 </div>
 
@@ -394,6 +427,9 @@ let marziaDone = false;
 let vincenzoDone = false;
 let marziaQ1Done = false;
 let vincenzoQ1Done = false;
+let marziaQ2Done = false;
+let vincenzoQ2Done = false;
+
 
 
 const marziaQ1 = document.getElementById('marziaQ1');
@@ -428,27 +464,45 @@ function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia, i
                     boxElement.classList.remove('active');
 
                     if (isFirstQuestion) {
-                        // Segna che la Q1 è stata completata
-                        if (isMarzia) {
-                            marziaQ1Done = true;
-                        } else {
-                            vincenzoQ1Done = true;
-                        }
 
-                        // Se entrambi hanno finito la Q1 → mostra Q2
-                        if (marziaQ1Done && vincenzoQ1Done) {
-                            marziaQ2.classList.add('active');
-                            vincenzoQ2.classList.add('active');
-                        }
-
-                    } else {
-                        // Q2 completata → lato completato
-                        if (isMarzia) marziaDone = true;
-                        else vincenzoDone = true;
-
-                        checkBothDone();
-                    }
-
+                      if (isMarzia) {
+                          marziaQ1Done = true;
+                          marziaWait.style.display = "block";   // mostra attesa Marzia
+                      } else {
+                          vincenzoQ1Done = true;
+                          vincenzoWait.style.display = "block"; // mostra attesa Vincenzo
+                      }
+                  
+                      // Se entrambi hanno risposto → mostra Q2 e nascondi attese
+                      if (marziaQ1Done && vincenzoQ1Done) {
+                          marziaWait.style.display = "none";
+                          vincenzoWait.style.display = "none";
+                  
+                          marziaQ2.classList.add('active');
+                          vincenzoQ2.classList.add('active');
+                      }
+                  }
+                   } else {
+                      // DOMANDA 2
+                      if (isMarzia) {
+                          marziaQ2Done = true;
+                          marziaWait2.style.display = "block";   // mostra attesa Marzia
+                      } else {
+                          vincenzoQ2Done = true;
+                          vincenzoWait2.style.display = "block"; // mostra attesa Vincenzo
+                      }
+                  
+                      // Se entrambi hanno risposto → vai alla domanda di coppia
+                      if (marziaQ2Done && vincenzoQ2Done) {
+                          marziaWait2.style.display = "none";
+                          vincenzoWait2.style.display = "none";
+                  
+                          marziaDone = true;
+                          vincenzoDone = true;
+                  
+                          checkBothDone();
+                      }
+                  }
                 }, 500);
 
             } else {
