@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gioco promessa – Vincenzo & Marzia</title>
+
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: #fff;
+        overflow-x: hidden;
+    }
+
+    .header {
+        text-align: center;
+        padding: 15px 10px;
+        background: linear-gradient(90deg, #ff4d6d, #ffb347);
+        color: #fff;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .header span {
+        display: block;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: row;
+        min-height: calc(100vh - 70px);
+    }
+
+    .side {
+        flex: 1;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .left-side {
+        background: #2b1b1b;
+        border-right: 1px solid #444;
+    }
+
+    .right-side {
+        background: #102235;
+        border-left: 1px solid #444;
+    }
+
+    .side-title {
+        margin-top: 5px;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #fff;
+        margin-top: 10px;
+    }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .question-box {
+        margin-top: 15px;
+        width: 100%;
+        max-width: 320px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 10px;
+        padding: 10px;
+        display: none;
+    }
+
+    .question-box.active { display: block; }
+
+    .question-text {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+
+    .answers {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .answer-btn {
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-align: left;
+        background: #333;
+        color: #fff;
+        transition: transform 0.15s, background 0.15s;
+    }
+
+    .answer-btn.correct { background: #2ecc71 !important; }
+    .answer-btn.wrong { background: #e74c3c !important; }
+
+    .shake { animation: shake 0.3s; }
+
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-4px); }
+        100% { transform: translateX(0); }
+    }
+
+    .ohno { animation: ohno 0.6s; }
+
+    @keyframes ohno {
+        0% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-4px) rotate(-5deg); }
+        50% { transform: translateY(4px) rotate(5deg); }
+        75% { transform: translateY(-4px) rotate(-5deg); }
+        100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    .center-section {
+        position: fixed;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 380px;
+        background: #1b1b1b;
+        border-radius: 12px;
+        padding: 15px;
+        display: none;
+        z-index: 20;
+    }
+
+    .center-section.active { display: block; }
+
+    .center-img {
+        width: 100%;
+        max-width: 260px;
+        border-radius: 10px;
+        margin: 0 auto 10px auto;
+        display: block;
+    }
+
+    .timer {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        color: #ffb347;
+        font-weight: bold;
+    }
+
+    .final-message {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 30;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .final-message.active {
+        display: flex;
+        animation: fadeIn 1.2s forwards;
+    }
+
+    .final-message img {
+        width: 80%;
+        max-width: 280px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .heart {
+        position: fixed;
+        bottom: -20px;
+        font-size: 24px;
+        color: #ff4d6d;
+        animation: rise 4s linear forwards;
+        opacity: 0.9;
+        z-index: 25;
+    }
+
+    @keyframes rise {
+        0% { transform: translateY(0) scale(1); opacity: 1; }
+        100% { transform: translateY(-600px) scale(1.8); opacity: 0; }
+    }
+
+    .firework {
+        position: fixed;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: explode 1s ease-out forwards;
+        z-index: 24;
+    }
+
+    @keyframes explode {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(20); opacity: 0; }
+    }
+
+    /* Easter egg icons */
+    .easter-egg {
+        position: fixed;
+        bottom: 10px;
+        font-size: 1.8rem;
+        cursor: pointer;
+        z-index: 40;
+        opacity: 0.8;
+    }
+
+    #padelEgg { right: 10px; }
+    #pandaEgg { left: 10px; }
+
+    .easter-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 50;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .easter-popup.active { display: flex; }
+
+    .easter-popup img {
+        width: 80%;
+        max-width: 260px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .close-easter {
+        margin-top: 8px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        background: #ff4d6d;
+        color: #fff;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    Vincenzo e Marzia, se il regalo vorrete trovare,
+    <span>alle domande del cuore dovrete insieme saper collaborare.</span>
+</div>
+
+<div class="game-container">
+
+    <!-- Lato Marzia -->
+    <div class="side left-side">
+        <div class="avatar" id="avatarMarzia">
+            <img src="https://i.imgur.com/0Q09xci.png" alt="Marzia">
+        </div>
+        <div class="side-title">Marzia – Maestra di Cina 🐉</div>
+
+        <div class="question-box active" id="marziaQ1">
+            <div class="question-text">
+                Quale di questi elementi NON appartiene ai “Quattro Tesori dello Studio” della tradizione cinese?
+            </div>
+            <div class="answers">
+                <button class="answer-btn" data-correct="false">A) Pennello</button>
+                <button class="answer-btn" data-correct="false">B) Inchiostro</button>
+                <button class="answer-btn" data-correct="false">C) Carta</button>
+                <button class="answer-btn" data-correct="true">D) Ventaglio</button>
+            </div>
+        </div>
+
+        <div class="question-box" id="marziaQ2">
+            <div class="question-text">
+                Quale delle seguenti province cinesi è la più estesa per superficie?
+            </div>
+            <div class="answers">
+                <button class="answer-btn" data-correct="true">A) Xinjiang</button>
+                <button class="answer-btn" data-correct="false">B) Sichuan</button>
+                <button class="answer-btn" data-correct="false">C) Qinghai</button>
+                <button class="answer-btn" data-correct="false">D) Yunnan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lato Vincenzo -->
+    <div class="side right-side">
+        <div class="avatar" id="avatarVincenzo">
+            <img src="https://i.imgur.com/BFs2R6I.png" alt="Vincenzo">
+        </div>
+        <div class="side-title">Vincenzo – Re del Padel 🎾</div>
+
+        <div class="question-box active" id="vincenzoQ1">
+            <div class="question-text">
+                In quale di queste situazioni il punto viene assegnato automaticamente all’avversario?
+            </div>
+            <div class="answers">
+                <button class="answer-btn" data-correct="false">A) La palla colpisce la grata laterale dopo aver toccato il vetro</button>
+                <button class="answer-btn" data-correct="true">B) Il giocatore colpisce la palla e questa rimbalza sul proprio corpo</button>
+                <button class="answer-btn" data-correct="false">C) La palla rimbalza due volte nel campo avversario</button>
+                <button class="answer-btn" data-correct="false">D) Il giocatore colpisce la palla al volo prima che superi la rete</button>
+            </div>
+        </div>
+
+        <div class="question-box" id="vincenzoQ2">
+            <div class="question-text">
+                Quale colpo è considerato il più difficile da eseguire correttamente a livello avanzato?
+            </div>
+            <div class="answers">
+                <button class="answer-btn" data-correct="false">A) Vibora</button>
+                <button class="answer-btn" data-correct="false">B) Bandeja</button>
+                <button class="answer-btn" data-correct="false">C) Chiquita</button>
+                <button class="answer-btn" data-correct="true">D) Remate x3</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Domanda di coppia -->
+<div class="center-section" id="coupleSection">
+    <div class="center-title">Domanda di coppia 💍</div>
+    <img src="IMMAGINE_BUFFA.jpg" class="center-img">
+    <div class="timer" id="timerDisplay">Tempo: 15s</div>
+    <div class="question-text">
+        Qual è la qualità che più vi unisce come coppia?
+    </div>
+    <div class="answers" id="coupleAnswers">
+        <button class="answer-btn" data-correct="false">A) La pazienza</button>
+        <button class="answer-btn" data-correct="false">B) Il senso dell’umorismo</button>
+        <button class="answer-btn" data-correct="true">C) La complicità</button>
+        <button class="answer-btn" data-correct="false">D) La capacità di supportarvi sempre</button>
+    </div>
+</div>
+
+<!-- Finale -->
+<div class="final-message" id="finalMessage">
+    <img src="IMMAGINE_BUFFA.jpg">
+    <h2>Promessa superata! 🎉</h2>
+    <p>Che l’amore, tra Cina e padel, vi accompagni per tutta la vita.</p>
+</div>
+
+<!-- Easter egg Padel -->
+<div class="easter-egg" id="padelEgg">🎾</div>
+<div class="easter-popup" id="padelPopup">
+    <img src="https://tenor.com/odQPdsR9LSt.gif">
+    <button class="close-easter" id="closePadel">Chiudi</button>
+</div>
+
+<!-- Easter egg Panda -->
+<div class="easter-egg" id="pandaEgg">🐼</div>
+<div class="easter-popup" id="pandaPopup">
+    <img src="https://tenor.com/BqNgE7JlCb.gif">
+    <button class="close-easter" id="closePanda">Chiudi</button>
+</div>
+
+<script>
+let marziaDone = false;
+let vincenzoDone = false;
+
+const marziaQ1 = document.getElementById('marziaQ1');
+const marziaQ2 = document.getElementById('marziaQ2');
+const vincenzoQ1 = document.getElementById('vincenzoQ1');
+const vincenzoQ2 = document.getElementById('vincenzoQ2');
+
+const avatarMarzia = document.getElementById('avatarMarzia');
+const avatarVincenzo = document.getElementById('avatarVincenzo');
+
+const coupleSection = document.getElementById('coupleSection');
+const timerDisplay = document.getElementById('timerDisplay');
+const finalMessage = document.getElementById('finalMessage');
+
+let timer = null;
+let timeLeft = 15;
+let coupleAnsweredCorrectly = false;
+
+function setupQuestionBox(boxElement, nextBoxElement, avatarElement, isMarzia) {
+    const buttons = boxElement.querySelectorAll('.answer-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const correct = btn.getAttribute('data-correct') === 'true';
+
+            buttons.forEach(b => b.disabled = true);
+
+            if (correct) {
+                btn.classList.add('correct');
+                setTimeout(() => {
+                    boxElement.classList.remove('active');
+                    if (nextBoxElement) {
+                        nextBoxElement.classList.add('active');
+                    } else {
+                        if (isMarzia) marziaDone = true;
+                        else vincenzoDone = true;
+                        checkBothDone();
+                    }
+                }, 500);
+            } else {
+                btn.classList.add('wrong', 'shake');
+                avatarElement.classList.add('shake');
+                setTimeout(() => {
+                    btn.classList.remove('shake');
+                    avatarElement.classList.remove('shake');
+                    buttons.forEach(b => {
+                        b.disabled = false;
+                        if (!b.classList.contains('correct')) b.classList.remove('wrong');
+                    });
+                }, 500);
+            }
+        });
+    });
+}
+
+setupQuestionBox(marziaQ1, marziaQ2, avatarMarzia, true);
+setupQuestionBox(marziaQ2, null, avatarMarzia, true);
+setupQuestionBox(vincenzoQ1, vincenzoQ2, avatarVincenzo, false);
+setupQuestionBox(vincenzoQ2, null, avatarVincenzo, false);
+
+function checkBothDone() {
+    if (marziaDone && vincenzoDone && !coupleAnsweredCorrectly) {
+        showCoupleQuestion();
+    }
+}
+
+const coupleButtons = document.querySelectorAll('#coupleAnswers .answer-btn');
+
+function showCoupleQuestion() {
+    coupleSection.classList.add('active');
+    resetTimer();
+    startTimer();
+    coupleButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('correct', 'wrong');
+    });
+}
+
+function resetTimer() {
+    if (timer) clearInterval(timer);
+    timeLeft = 15;
+    timerDisplay.textContent = 'Tempo: ' + timeLeft + 's';
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = 'Tempo: ' + timeLeft + 's';
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            handleTimeOut();
+        }
+    }, 1000);
+}
+
+function handleTimeOut() {
+    avatarMarzia.classList.add('ohno');
+    avatarVincenzo.classList.add('ohno');
+    setTimeout(() => {
+        avatarMarzia.classList.remove('ohno');
+        avatarVincenzo.classList.remove('ohno');
+    }, 800);
+
+    coupleSection.classList.remove('active');
+    coupleButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('correct', 'wrong');
+    });
+
+    setTimeout(() => showCoupleQuestion(), 1000);
+}
+
+coupleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const correct = btn.getAttribute('data-correct') === 'true';
+        coupleButtons.forEach(b => b.disabled = true);
+
+        if (correct) {
+            coupleAnsweredCorrectly = true;
+            btn.classList.add('correct');
+            clearInterval(timer);
+            setTimeout(() => {
+                coupleSection.classList.remove('active');
+                triggerFinal();
+            }, 600);
+        } else {
+            btn.classList.add('wrong', 'shake');
+            setTimeout(() => {
+                btn.classList.remove('shake');
+                coupleButtons.forEach(b => {
+                    b.disabled = false;
+                    if (!b.classList.contains('correct')) b.classList.remove('wrong');
+                });
+            }, 500);
+        }
+    });
+});
+
+function triggerFinal() {
+    finalMessage.classList.add('active');
+
+    for (let i = 0; i < 25; i++) {
+        const firework = document.createElement('div');
+        firework.classList.add('firework');
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * (window.innerHeight / 2);
+        firework.style.left = x + 'px';
+        firework.style.top = y + 'px';
+        firework.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
+        document.body.appendChild(firework);
+        setTimeout(() => firework.remove(), 1000);
+    }
+
+    const heartInterval = setInterval(() => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = '❤️';
+        heart.style.left = Math.random() * window.innerWidth + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 4000);
+    }, 400);
+
+    setTimeout(() => clearInterval(heartInterval), 8000);
+}
+
+// Easter egg Padel
+const padelEgg = document.getElementById('padelEgg');
+const padelPopup = document.getElementById('padelPopup');
+const closePadel = document.getElementById('closePadel');
+
+padelEgg.addEventListener('click', () => {
+    padelPopup.classList.add('active');
+});
+
+closePadel.addEventListener('click', () => {
+    padelPopup.classList.remove('active');
+});
+
+padelPopup.addEventListener('click', (e) => {
+    if (e.target === padelPopup) padelPopup.classList.remove('active');
+});
+
+// Easter egg Panda
+const pandaEgg = document.getElementById('pandaEgg');
+const pandaPopup = document.getElementById('pandaPopup');
+const closePanda = document.getElementById('closePanda');
+
+pandaEgg.addEventListener('click', () => {
+    pandaPopup.classList.add('active');
+});
+
+closePanda.addEventListener('click', () => {
+    pandaPopup.classList.remove('active');
+});
+
+pandaPopup.addEventListener('click', (e) => {
+    if (e.target === pandaPopup) pandaPopup.classList.remove('active');
+});
+</script>
+
+</body>
+</html>
